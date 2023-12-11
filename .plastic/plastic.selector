@@ -1,0 +1,4 @@
+repository "GameDesignFinalProject@splashed_white@cloud.cn"
+  path "/"
+    br "/main"
+    co "/main"

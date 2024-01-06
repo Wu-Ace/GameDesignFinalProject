@@ -4,16 +4,24 @@ using UnityEngine;
 
 public class PlayerAttack : MonoBehaviour
 {
+    private float moveSpeed = CharacterControler.moveSpeed;
     private void OnCollisionEnter(Collision other)
     {
         if (other.gameObject.CompareTag("Enemy"))
         { 
             Rigidbody rb = GetComponent<Rigidbody>();
             float impactForce = rb.velocity.magnitude; // 获取碰撞力大小
-            
+            // Debug.Log(impactForce);
             int attackDamage = CalculateDamage(impactForce);
             other.gameObject.GetComponent<EnemyHealth>().TakeDamage(attackDamage);
-            Debug.Log(attackDamage);
+            // Debug.Log(attackDamage);
+
+            moveSpeed = CharacterControler.moveSpeed * CharacterControler.obstacleSlowdownFactor;
+            // Debug.Log("Hit");
+        }
+        else
+        {
+            moveSpeed = CharacterControler.moveSpeed;
         }
     }
 

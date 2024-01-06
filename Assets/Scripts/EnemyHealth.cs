@@ -6,6 +6,7 @@ public class EnemyHealth : MonoBehaviour
 {
     public int maxHealth = 100; // 敌人最大血量
     private int currentHealth; // 当前血量
+    public float deathTime=0.2f; 
 
     private void Start()
     {
@@ -28,6 +29,6 @@ public class EnemyHealth : MonoBehaviour
         GetComponent<EnemyAi>().enabled = false; // 停止移动脚本
         GetComponent<Rigidbody>().velocity = Vector3.zero; // 停止速度
         // 此处可添加播放死亡动画或其他动作
-        Destroy(gameObject, 2f); // 两秒后销毁敌人物体
+        Destroy(gameObject, deathTime); // 两秒后销毁敌人物体 
     }
 }

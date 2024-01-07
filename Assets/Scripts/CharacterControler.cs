@@ -1,7 +1,7 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+
+using Cinemachine;
 
 public class CharacterControler : MonoBehaviour
 {
@@ -11,14 +11,26 @@ public class CharacterControler : MonoBehaviour
     public static float obstacleSlowdownFactor = 0.2f;
     public static Rigidbody rb;
     private bool isGrounded = true;
-    private int health = 100; // 玩家血量
-    private bool canTakeDamage = true; // 是否能够受到伤害
-    public float damageCooldown = 1f; // 伤害冷却时间
+    private int health = 100;
+    private bool canTakeDamage = true;
+    public float damageCooldown = 0.8f;
     public float deathTime = 1f;
-
+    public CinemachineVirtualCamera virtualCamera;
+    CinemachineBasicMultiChannelPerlin noise;
+    public CinemachineImpulseSource impulseSource;
+    public CinemachineVirtualCamera mainCamera;
+    public AudioClip[] hurtSounds; // 存储多个受伤音效
+    private AudioSource audioSource; // 用于播放音效的组件
+    public GameObject Restart;
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
+        // impulseSource = GetComponent<CinemachineImpulseSource>();
+        // // virtualCamera = GetComponent<CinemachineVirtualCamera>();
+        // noise = virtualCamera.GetCinemachineComponent<CinemachineBasicMultiChannelPerlin();
+        //
+        // noise.m_AmplitudeGain = 0; //震动个数
+        // noise.m_FrequencyGain = 0; //震动幅度
     }
 
     void FixedUpdate()
@@ -38,14 +50,13 @@ public class CharacterControler : MonoBehaviour
             rb.velocity += Vector3.up * Physics.gravity.y * (fallMultiplier - 1) * Time.deltaTime;
         }
 
-        // 在此更新伤害冷却计时器
         if (!canTakeDamage)
         {
             damageCooldown -= Time.deltaTime;
             if (damageCooldown <= 0)
             {
                 canTakeDamage = true;
-                damageCooldown = 5f; // 重置冷却时间
+                damageCooldown = 5f;
             }
         }
     }
@@ -72,13 +83,28 @@ public class CharacterControler : MonoBehaviour
         if (other.gameObject.CompareTag("Ground"))
         {
             isGrounded = true;
+
+            // 落到地面上时震飞周围物体
+            ShakeSurroundingObjects();
+            impulseSource.GenerateImpulseAtPositionWithVelocity(transform.position, Vector3.up * 10f);
+            mainCamera.GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>().m_AmplitudeGain = 1f;
+            Invoke("ResetCameraShake", 1f);
+            PlayRandomHurtSound();
         }
         else if (other.gameObject.CompareTag("Enemy") && canTakeDamage)
         {
-            TakeDamage(10); 
-            // 碰到敌人扣除 10 点血量
-            canTakeDamage = false; // 触发伤害冷却
+            TakeDamage(10);
+            canTakeDamage = false;
+            mainCamera.m_Lens.FieldOfView -= 3f; 
+            mainCamera.m_Lens.Dutch -= 5f;
+            // PlayRandomHurtSound(); // 播放受伤音效
+
         }
+        else if (other.gameObject.CompareTag("Border"))
+        {
+            Die();
+        }
+        
     }
 
     void TakeDamage(int damageAmount)
@@ -89,25 +115,48 @@ public class CharacterControler : MonoBehaviour
         {
             Die();
         }
+        else
+        {
+        }
     }
-
 
     void Die()
     {
-        // 实现玩家死亡的逻辑
-        GetComponent<CharacterControler>().enabled = false; // 停止移动脚本
-        GetComponent<Rigidbody>().velocity = Vector3.zero; // 停止速度
-        // 此处可添加播放死亡动画或其他动作
-        Destroy(gameObject, deathTime);
+        GetComponent<CharacterControler>().enabled = false;
+        GetComponent<Rigidbody>().velocity = Vector3.zero;
+        // Destroy(gameObject, deathTime);
+        Restart.SetActive(true);
         Debug.Log("Player died");
-        // 可以在这里执行玩家死亡后的操作
     }
-    void CheckIfGrounded(Collision other)
+
+    void ShakeSurroundingObjects()
     {
-        if (other.gameObject.CompareTag("Ground"))
+        // 获取周围的物体，这里简化为获取所有Collider在半径为5的范围内的物体
+        Collider[] colliders = Physics.OverlapSphere(transform.position, 20f);
+
+        foreach (Collider collider in colliders)
+        {
+            Rigidbody otherRb = collider.GetComponent<Rigidbody>();
+
+            // 需要给物体添加Rigidbody组件
+            if (otherRb != null)
             {
-                isGrounded = true;
+                Vector3 direction = (otherRb.transform.position - transform.position).normalized;
+                otherRb.AddForce(direction * 5f, ForceMode.Impulse);
             }
+        }
     }
-    
+    void ResetCameraShake()
+    {
+        mainCamera.GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>().m_AmplitudeGain = 0f;
+    }
+    void PlayRandomHurtSound()
+    {
+        if (hurtSounds.Length > 0 && audioSource != null)
+        {
+            int randomIndex = Random.Range(0, hurtSounds.Length);
+            audioSource.clip = hurtSounds[randomIndex];
+            audioSource.Play();
+        }
+    }
 }

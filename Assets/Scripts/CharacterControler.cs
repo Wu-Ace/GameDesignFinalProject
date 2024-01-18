@@ -1,17 +1,21 @@
+using System;
 using System.Collections;
 using UnityEngine;
 
 using Cinemachine;
+using Random = UnityEngine.Random;
 
 public class CharacterControler : MonoBehaviour
 {
-    public static float moveSpeed = 25f;
+    private static CharacterControler instance;
+    
+    public static float moveSpeed = 35f;
     public float jumpForce = 10000f;
     public float fallMultiplier = 2.5f;
     public static float obstacleSlowdownFactor = 0.2f;
-    public static Rigidbody rb;
+    private Rigidbody rb;
     private bool isGrounded = true;
-    private int health = 100;
+    public static int health = 100;
     private bool canTakeDamage = true;
     public float damageCooldown = 0.8f;
     public float deathTime = 1f;
@@ -22,15 +26,22 @@ public class CharacterControler : MonoBehaviour
     public AudioClip[] hurtSounds; // 存储多个受伤音效
     private AudioSource audioSource; // 用于播放音效的组件
     public GameObject Restart;
+    private GameObject _player;
+    public GameObject hitEffectPrefab; // 击打特效预制体
+
     private void Awake()
     {
-        rb = GetComponent<Rigidbody>();
-        // impulseSource = GetComponent<CinemachineImpulseSource>();
-        // // virtualCamera = GetComponent<CinemachineVirtualCamera>();
-        // noise = virtualCamera.GetCinemachineComponent<CinemachineBasicMultiChannelPerlin();
-        //
-        // noise.m_AmplitudeGain = 0; //震动个数
-        // noise.m_FrequencyGain = 0; //震动幅度
+        // rb = GetComponent<Rigidbody>();
+        if (instance == null)
+        {
+            instance = this;
+            DontDestroyOnLoad(this.gameObject);
+        }
+        else if (instance != this)
+        {
+            Destroy(this.gameObject);
+        }
+        
     }
 
     void FixedUpdate()
@@ -40,6 +51,17 @@ public class CharacterControler : MonoBehaviour
 
     private void Update()
     {
+        if(rb == null)
+        {
+
+            // _player = GameObject.FindGameObjectWithTag("Player");
+            rb = this.GetComponent<Rigidbody>();
+        }
+        else
+        {
+            Debug.Log("rb is null");
+        }
+        
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
         {
             Jump();
@@ -59,6 +81,11 @@ public class CharacterControler : MonoBehaviour
                 damageCooldown = 5f;
             }
         }
+    }
+
+    private void Start()
+    {
+        moveSpeed = 35f;
     }
 
     void MoveCharacter()
@@ -95,8 +122,9 @@ public class CharacterControler : MonoBehaviour
         {
             TakeDamage(10);
             canTakeDamage = false;
-            mainCamera.m_Lens.FieldOfView -= 3f; 
-            mainCamera.m_Lens.Dutch -= 5f;
+            mainCamera.m_Lens.FieldOfView -= 5f; 
+            mainCamera.m_Lens.Dutch -= 2f;
+            moveSpeed -= 3f;
             // PlayRandomHurtSound(); // 播放受伤音效
 
         }
@@ -117,6 +145,12 @@ public class CharacterControler : MonoBehaviour
         }
         else
         {
+            if (hitEffectPrefab != null)
+            {
+                Instantiate(hitEffectPrefab, transform.position, Quaternion.identity);
+            }
+
+            PlayRandomHurtSound(); // 播放随机受伤音效
         }
     }
 
@@ -148,7 +182,7 @@ public class CharacterControler : MonoBehaviour
     }
     void ResetCameraShake()
     {
-        mainCamera.GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>().m_AmplitudeGain = 0f;
+        mainCamera.GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>().m_AmplitudeGain = 0f; 
     }
     void PlayRandomHurtSound()
     {

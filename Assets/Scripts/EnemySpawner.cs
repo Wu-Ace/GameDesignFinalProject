@@ -1,5 +1,7 @@
+using System;
 using Unity.XR.OpenVR;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class EnemySpawner : MonoBehaviour
 {
@@ -11,17 +13,31 @@ public class EnemySpawner : MonoBehaviour
 
     private Camera mainCamera;
     private Vector3 viewportPoint;
+    public Transform playerTransform;
 
     private void Start()
     {
         mainCamera = Camera.main;
+        playerTransform = GameObject.FindGameObjectWithTag("Player").transform;
         // 开始生成敌人
         Invoke("SpawnEnemy", Random.Range(minSpawnDelay, maxSpawnDelay));
     }
 
+    private void Update()
+    {
+        if (mainCamera == null)
+        {
+            mainCamera = Camera.main;
+        }
+        if (playerTransform == null)
+        {
+            playerTransform = GameObject.FindGameObjectWithTag("Player").transform;
+        }
+    }
+
     void SpawnEnemy()
     {
-        Vector3 spawnPos = GetRandomSpawnPositionOutsideCamera();
+        Vector3 spawnPos = GetRandomSpawnPositionAroundPlayer();
         // 生成敌人
         int rand = Random.Range(1, 11); // 生成 1 到 10 的随机数
         GameObject enemyPrefab;
@@ -31,11 +47,11 @@ public class EnemySpawner : MonoBehaviour
         {
             enemyPrefab = enemyPrefab1;
         }
-        else if (rand <= 8) // 30% 的概率
+        else if (rand <= 9) // 40% 的概率
         {
             enemyPrefab = enemyPrefab2;
         }
-        else // 20% 的概率
+        else // 10% 的概率
         {
             enemyPrefab = enemyPrefab3;
         }
@@ -47,30 +63,19 @@ public class EnemySpawner : MonoBehaviour
 
     }
 
-    Vector3 GetRandomSpawnPositionOutsideCamera()
+    Vector3 GetRandomSpawnPositionAroundPlayer()
     {
-        
-        Vector3 cameraPosition = mainCamera.transform.position;// 获取摄像机视野边界
-        
-        if (Random.Range(0, 2) == 0)
-        {
-            viewportPoint.x = Random.Range(1.5f, 2.0f);
-        }
-        else
-        {
-            viewportPoint.x = Random.Range(-2.0f, -1.5f);
-        }
-        if (Random.Range(0, 2) == 0)
-        {
-            viewportPoint.z = mainCamera.nearClipPlane + 10f;
-        }
-        else
-        {
-            viewportPoint.z = mainCamera.nearClipPlane - 10f;
-        }
-       
-        Vector3 spawnPos = mainCamera.ViewportToWorldPoint(viewportPoint); // 将视口坐标转换为世界坐标
-        spawnPos.y = 0f; // 确保在地面上
+        Vector3 playerPosition = playerTransform.position; // 获取玩家的位置
+
+        float spawnRadius = 40f; // 设置生成半径，可以根据需要调整
+
+        // 在玩家周围生成随机位置
+        float randomAngle = Random.Range(0f, 360f);
+        float spawnX = playerPosition.x + spawnRadius * Mathf.Cos(randomAngle * Mathf.Deg2Rad);
+        float spawnZ = playerPosition.z + spawnRadius * Mathf.Sin(randomAngle * Mathf.Deg2Rad);
+
+        Vector3 spawnPos = new Vector3(spawnX, 0f, spawnZ);
         return spawnPos;
     }
+
 }

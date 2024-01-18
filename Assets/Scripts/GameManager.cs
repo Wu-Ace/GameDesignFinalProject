@@ -4,6 +4,16 @@ using UnityEngine.SceneManagement;
 public class GameManager : MonoBehaviour
 {
     private static GameManager instance;
+    private Transform headTransform;
+    private Transform playerTransform;
+    private float initialAngle;
+    public float rotationThreshold = 360f;  // 这里可以根据需要调整，比如720f、1080f等
+    public GameObject enemySpawner;
+    private float lastResetTime;
+    private Vector3 directionToPlayer;
+    public GameObject playerUI;
+
+    private bool isPlayerRotating = false;
 
     private void Awake()
     {
@@ -16,18 +26,47 @@ public class GameManager : MonoBehaviour
         {
             Destroy(this.gameObject);
         }
+
+        if (playerTransform = null)
+        {
+            playerTransform = GameObject.FindGameObjectWithTag("Player").transform;
+        }
+
+        if (headTransform = null)
+        {
+            headTransform = GameObject.FindGameObjectWithTag("Head").transform;
+
+        }
+
+    }
+    
+    
+    private void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
-    public Transform headTransform;
-    public Transform playerTransform;
-    private float initialAngle;
-    public float rotationThreshold = 360f;  // 这里可以根据需要调整，比如720f、1080f等
-    public GameObject enemySpawner;
-    private float lastResetTime;
-    private Vector3 directionToPlayer;
-    public GameObject playerUI;
-
-    private bool isPlayerRotating = false;
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        // 重新获取引用
+        if (playerTransform != null)
+            playerTransform = playerTransform.transform;
+        else
+            playerTransform = GameObject.FindGameObjectWithTag("Player").transform;
+        if (headTransform != null)
+            headTransform = headTransform;
+        else
+            headTransform = GameObject.FindGameObjectWithTag("Head").transform;
+        // if (playerUI != null)
+        // {
+        //     playerUI.SetActive(false);
+        // }
+    }
+    
 
     private void Start()
     {
@@ -37,9 +76,22 @@ public class GameManager : MonoBehaviour
     private void Update()
     {
         // 当directionToPlayer.magnitude < 1 时进行检测
+        if (playerTransform != null)
+            playerTransform = playerTransform.transform;
+        else
+            playerTransform = GameObject.FindGameObjectWithTag("Player").transform;
+        if (headTransform != null)
+            headTransform = headTransform;
+        else
+            headTransform = GameObject.FindGameObjectWithTag("Head").transform;
         directionToPlayer = headTransform.position - playerTransform.position;
         float currentAngle = GetPlayerAngle();
         // Debug.Log(directionToPlayer);
+        
+        // if(playerUI == null)
+        // {
+        //     playerUI = GameObject.Find("PlayerUI");
+        // }
 
         // 如果玩家开始转动
         if (!isPlayerRotating && directionToPlayer.y < 3)
@@ -60,7 +112,11 @@ public class GameManager : MonoBehaviour
             {
                 // 激活敌人生成器
                 enemySpawner.gameObject.SetActive(true);
-                playerUI.SetActive(false);
+                if (playerUI != null)
+                {
+                    playerUI.SetActive(false);
+
+                }
                     // 为下一次检查更新初始角度
                 initialAngle = currentAngle;
                 isPlayerRotating = false; // 头部完成一整圈旋转后重置状态

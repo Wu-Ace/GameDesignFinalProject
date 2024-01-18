@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 8455412317878566151}
   - component: {fileID: 3829713431265258125}
   - component: {fileID: 9097753876044040504}
+  - component: {fileID: -3544933109882225220}
   - component: {fileID: 6464508393633749595}
   - component: {fileID: 4726471518225829326}
   - component: {fileID: 154538559625372675}
@@ -111,7 +112,7 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &6464508393633749595
+--- !u!114 &-3544933109882225220
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -119,6 +120,22 @@ MonoBehaviour:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7108291308987099385}
   m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cbe60506719e26e4aa8151b9ca41a849, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enemyMoveSpeed: 5
+  dashSpeed: 35
+  dashDuration: 1.5
+  timeBetweenDashes: 3
+--- !u!114 &6464508393633749595
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7108291308987099385}
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 11b9f2e36aaabd04a9f1859004d7ec21, type: 3}
   m_Name: 
@@ -142,6 +159,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 0f206a91da85312458fc9684cdb451cb, type: 3}
   - {fileID: 8300000, guid: c126269c8d67cf048a3d25865e03a2ef, type: 3}
   - {fileID: 8300000, guid: 3bf77df45070eef4a99f05c9cdbda0a8, type: 3}
+  hitEffectPrefab: {fileID: 1855497614338780, guid: 7d5ca1dbe195f8648a8cda334d4519f3, type: 3}
 --- !u!54 &154538559625372675
 Rigidbody:
   m_ObjectHideFlags: 0

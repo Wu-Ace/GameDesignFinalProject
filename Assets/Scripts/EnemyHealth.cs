@@ -8,11 +8,19 @@ public class EnemyHealth : MonoBehaviour
     public float deathTime = 0.2f;
     public AudioClip[] hitSounds; // 存储多个受击音效
     private AudioSource audioSource; // 用于播放音效的组件
+    public GameObject hitEffectPrefab; // 受伤特效预制体
+    public static int deadEnemyCount = 0;
+    private static UIManager _uiManager;
+
 
     private void Start()
     {
         currentHealth = maxHealth;
         audioSource = GetComponent<AudioSource>(); // 获取 AudioSource 组件
+        if (_uiManager == null)
+        {
+            _uiManager = GameObject.FindObjectOfType<UIManager>();
+        }
     }
 
     public void TakeDamage(int damageAmount)
@@ -26,11 +34,22 @@ public class EnemyHealth : MonoBehaviour
         else
         {
             PlayRandomHitSound(); // 播放随机受击音效
+            if (hitEffectPrefab != null)
+            {
+                Instantiate(hitEffectPrefab, transform.position, Quaternion.identity);
+            }
         }
     }
 
     void Die()
     {
+        // 增加死去的敌人数量
+        deadEnemyCount++;
+        // 更新 UI 文本
+        if (_uiManager != null)
+        {
+            _uiManager.UpdateDeadEnemyCountText();
+        }
         // 敌人死亡逻辑，例如停止移动、播放死亡动画等
         GetComponent<EnemyAi>().enabled = false; // 停止移动脚本
         GetComponent<Rigidbody>().velocity = Vector3.zero; // 停止速度

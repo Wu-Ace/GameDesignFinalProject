@@ -21,6 +21,7 @@ public class EnemyHealth : MonoBehaviour
         {
             _uiManager = GameObject.FindObjectOfType<UIManager>();
         }
+        
     }
 
     public void TakeDamage(int damageAmount)

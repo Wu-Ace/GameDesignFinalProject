@@ -26,6 +26,7 @@ public class UIManager : MonoBehaviour
         {
             UpdatePlayerHealthText();
         }
+        EnemyHealth.deadEnemyCount = 0;
     }
 
     private void Update()

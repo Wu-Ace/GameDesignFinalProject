@@ -86,6 +86,8 @@ public class CharacterControler : MonoBehaviour
     private void Start()
     {
         moveSpeed = 35f;
+        health = 100;
+        
     }
 
     void MoveCharacter()
@@ -124,7 +126,7 @@ public class CharacterControler : MonoBehaviour
             canTakeDamage = false;
             mainCamera.m_Lens.FieldOfView -= 5f; 
             mainCamera.m_Lens.Dutch -= 2f;
-            moveSpeed -= 3f;
+            moveSpeed -= 1f;
             // PlayRandomHurtSound(); // 播放受伤音效
 
         }
@@ -134,6 +136,19 @@ public class CharacterControler : MonoBehaviour
         }
         
     }
+
+    private void OnCollisionStay(Collision other)
+    {
+        if (other.gameObject.CompareTag("Enemy") && canTakeDamage)
+        {
+            TakeDamage(10);
+            canTakeDamage = false;
+            mainCamera.m_Lens.FieldOfView -= 5f; 
+            mainCamera.m_Lens.Dutch -= 2f;
+            moveSpeed -= 3f;
+            // PlayRandomHurtSound(); // 播放受伤音效
+
+        }    }
 
     void TakeDamage(int damageAmount)
     {
